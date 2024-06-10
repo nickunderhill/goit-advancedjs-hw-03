@@ -14,18 +14,21 @@ async function loadBreeds() {
   breedSelect.classList.add('hidden');
   try {
     const breeds = await fetchBreeds();
-    breeds.forEach(breed => {
-      const option = document.createElement('option');
-      option.value = breed.id;
-      option.textContent = breed.name;
-      breedSelect.appendChild(option);
+    var options = breeds.map(({ id, name }) => ({ text: name, value: id }));
+    new SlimSelect({
+      select: '#breed-select',
+      data: [
+        {
+          placeholder: true,
+          text: 'Select breed',
+        },
+        ...options,
+      ],
+      events: {
+        afterChange: handleChangeSelect,
+      },
     });
-    new SlimSelect({ select: '#breed-select' });
     breedSelect.classList.remove('hidden');
-
-    if (breeds.length > 0) {
-      loadCatInfo(breeds[0].id);
-    }
   } catch (error) {
     showError(error.message);
   } finally {
@@ -52,7 +55,7 @@ function displayCatInfo(cat) {
   try {
     var { url, breeds } = cat;
     var breed = breeds[0];
-  catInfo.innerHTML = `
+    catInfo.innerHTML = `
           <img src="${url}" alt="${breed.name}">
           <div class="cat-info-text">
               <h2>${breed.name}</h2>
@@ -60,9 +63,11 @@ function displayCatInfo(cat) {
               <p><strong>Temperament:</strong> ${breed.temperament}</p>
           </div>
       `;
-  catInfo.classList.remove('hidden');
+    catInfo.classList.remove('hidden');
   } catch (error) {
-    showError("We cannot find information on this breed. Please check other breeds!");
+    showError(
+      'We cannot find information on this breed. Please check other breeds!'
+    );
     console.log(error);
   }
 }
@@ -77,9 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
   loadBreeds();
 });
 
-breedSelect.addEventListener('change', event => {
-  const breedId = event.target.value;
+const handleChangeSelect = event => {
+  const breedId = event[0].value;
   if (breedId) {
     loadCatInfo(breedId);
   }
-});
+};
