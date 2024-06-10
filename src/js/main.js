@@ -36,6 +36,7 @@ async function loadBreeds() {
 async function loadCatInfo(breedId) {
   loader.classList.remove('hidden');
   catInfo.classList.add('hidden');
+  errorElement.classList.add('hidden');
   try {
     catInfo.classList.add('hidden');
     const [cat] = await fetchCatByBreed(breedId);
@@ -48,8 +49,9 @@ async function loadCatInfo(breedId) {
 }
 
 function displayCatInfo(cat) {
-  const { url, breeds } = cat;
-  const breed = breeds[0];
+  try {
+    var { url, breeds } = cat;
+    var breed = breeds[0];
   catInfo.innerHTML = `
           <img src="${url}" alt="${breed.name}">
           <div class="cat-info-text">
@@ -59,6 +61,10 @@ function displayCatInfo(cat) {
           </div>
       `;
   catInfo.classList.remove('hidden');
+  } catch (error) {
+    showError("We cannot find information on this breed. Please check other breeds!");
+    console.log(error);
+  }
 }
 
 function showError(message) {
@@ -73,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 breedSelect.addEventListener('change', event => {
   const breedId = event.target.value;
-  console.log(event);
   if (breedId) {
     loadCatInfo(breedId);
   }
